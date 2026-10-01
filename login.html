@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Admin Enzo Alves</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Biblioteca do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <main style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+        <section class="login-container" style="background: #1e1e1e; padding: 40px; border-radius: 10px; text-align: center;">
+            <h2>Área Restrita</h2>
+            <p>Faça login para gerenciar o portfólio</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                <input type="email" id="email-login" placeholder="Seu E-mail" required style="padding: 10px;">
+                <input type="password" id="senha-login" placeholder="Sua Senha" required style="padding: 10px;">
+                <button onclick="fazerLogin()" style="padding: 10px; background: #007bff; color: white; border: none; cursor: pointer;">Entrar</button>
+            </div>
+            <p id="mensagem-erro" style="color: red; margin-top: 15px;"></p>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

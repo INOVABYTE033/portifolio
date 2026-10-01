@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Enzo Alves</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Biblioteca do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <h2>Painel Admin</h2>
+            <ul>
+                <li><a href="home.html">Voltar ao Site</a></li>
+                <li><a href="#" onclick="fazerLogout()" style="color: red;">Sair</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="dashboard-projetos">
+            <h2>Adicionar Novo Projeto</h2>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin: 20px auto; background: #1e1e1e; padding: 30px; border-radius: 10px;">
+                
+                <input type="text" id="titulo-projeto" placeholder="Título do Projeto" required style="padding: 10px;">
+                
+                <textarea id="descricao-projeto" placeholder="Descrição curta do projeto..." rows="4" required style="padding: 10px;"></textarea>
+                
+                <input type="text" id="imagem-projeto" placeholder="Nome da imagem (ex: projeto3.png) ou URL" required style="padding: 10px;">
+                
+                <input type="text" id="link-projeto" placeholder="Link do Projeto (URL)" required style="padding: 10px;">
+                
+                <button onclick="adicionarProjeto()" style="padding: 12px; background: #28a745; color: white; border: none; cursor: pointer;">Salvar Projeto no Banco</button>
+                
+                <p id="mensagem-status" style="margin-top: 10px; font-weight: bold;"></p>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
