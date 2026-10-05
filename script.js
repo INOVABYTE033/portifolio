@@ -1,13 +1,15 @@
-// Aguarda todo o HTML carregar antes de rodar o script
+// ==========================================
+// INICIALIZAÇÃO E EFEITOS VISUAIS
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('header');
 
     // Controla a cor do menu ao rolar a página
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) {
-            header.classList.add('scrolled');
+            if (header) header.classList.add('scrolled');
         } else {
-            header.classList.remove('scrolled');
+            if (header) header.classList.remove('scrolled');
         }
     });
 
@@ -90,16 +92,21 @@ document.addEventListener('DOMContentLoaded', () => {
             card.style.setProperty('--mouse-y', `${y}px`);
         });
     });
+
+    // Carregar projetos ao iniciar a página do portfólio
+    carregarProjetosPortefolio();
 });
 
-// 1. Conexão com o Supabase
+// ==========================================
+// CONEXÃO COM O SUPABASE
+// ==========================================
 const SUPABASE_URL = 'https://zivdjnfypxjogmwmzfxl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_0jUu47RgkVa2OyeAUREF2w_gY2yHPyr';
 
 const { createClient } = supabase;
 const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// 2. Função para testar a conexão buscando dados da tabela 'usuario'
+// Função para testar a conexão buscando dados da tabela 'usuario'
 async function testarConexao() {
     try {
         const { data, error } = await _supabase.from('usuario').select('*');
@@ -115,6 +122,34 @@ async function testarConexao() {
 }
 
 testarConexao();
+
+// ==========================================
+// FUNÇÃO DE NOTIFICAÇÃO TOAST
+// ==========================================
+function mostrarToast(mensagem, tipo = 'success') {
+    let container = document.getElementById('toast-container');
+    
+    // Se o container ainda não existir na página, cria-o automaticamente
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.classList.add('toast', tipo);
+    
+    const icone = tipo === 'success' ? '✅' : '❌';
+    toast.innerHTML = `<span>${icone}</span> <span>${mensagem}</span>`;
+
+    container.appendChild(toast);
+
+    // Remove o toast automaticamente após 3.5 segundos com animação de saída
+    setTimeout(() => {
+        toast.style.animation = 'toastOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+}
 
 // ==========================================
 // FUNÇÕES DA ÁREA ADMIN (LOGIN E DASHBOARD)
@@ -134,22 +169,29 @@ async function fazerLogin() {
             .single();
 
         if (error || !data) {
-            mensagem.innerText = 'Erro ao fazer login: E-mail ou senha incorretos.';
+            if (mensagem) mensagem.innerText = 'Erro ao fazer login: E-mail ou senha incorretos.';
+            mostrarToast('E-mail ou senha incorretos.', 'error');
             return;
         }
 
-        console.log('✅ Login efetuado com sucesso:', data.nome);
-        window.location.href = 'dashboard.html';
+        mostrarToast(`Bem-vindo de volta, ${data.nome}!`, 'success');
+        setTimeout(() => {
+            window.location.href = 'dashboard.html';
+        }, 1000);
 
     } catch (err) {
-        mensagem.innerText = 'Erro ao tentar fazer login.';
+        if (mensagem) mensagem.innerText = 'Erro ao tentar fazer login.';
+        mostrarToast('Erro ao tentar fazer login.', 'error');
         console.error(err);
     }
 }
 
 async function fazerLogout() {
     await _supabase.auth.signOut();
-    window.location.href = 'login.html';
+    mostrarToast('Sessão terminada com sucesso.', 'success');
+    setTimeout(() => {
+        window.location.href = 'login.html';
+    }, 800);
 }
 
 async function adicionarProjeto() {
@@ -160,8 +202,11 @@ async function adicionarProjeto() {
     const status = document.getElementById('mensagem-status');
 
     if (!nome || !descricao || !foto || !link) {
-        status.style.color = "red";
-        status.innerText = "Por favor, preencha todos os campos!";
+        if (status) {
+            status.style.color = "red";
+            status.innerText = "Por favor, preencha todos os campos!";
+        }
+        mostrarToast("Preenche todos os campos do projeto!", "error");
         return;
     }
 
@@ -179,8 +224,12 @@ async function adicionarProjeto() {
 
         if (error) throw error;
 
-        status.style.color = "#28a745";
-        status.innerText = "✅ Projeto adicionado com sucesso!";
+        if (status) {
+            status.style.color = "#28a745";
+            status.innerText = "✅ Projeto adicionado com sucesso!";
+        }
+        
+        mostrarToast("Projeto adicionado com sucesso!", "success");
         
         document.getElementById('titulo-projeto').value = '';
         document.getElementById('descricao-projeto').value = '';
@@ -188,8 +237,11 @@ async function adicionarProjeto() {
         document.getElementById('link-projeto').value = '';
 
     } catch (error) {
-        status.style.color = "red";
-        status.innerText = "❌ Erro ao adicionar projeto.";
+        if (status) {
+            status.style.color = "red";
+            status.innerText = "❌ Erro ao adicionar projeto.";
+        }
+        mostrarToast("Erro ao adicionar projeto no Supabase.", "error");
         console.error(error.message);
     }
 }
@@ -233,7 +285,3 @@ async function carregarProjetosPortefolio() {
         container.innerHTML = '<p>Erro ao carregar os projetos no momento.</p>';
     }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    carregarProjetosPortefolio();
-});
