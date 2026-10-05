@@ -10,6 +10,86 @@ document.addEventListener('DOMContentLoaded', () => {
             header.classList.remove('scrolled');
         }
     });
+
+    // ==========================================
+    // MOTOR DE PARTÍCULAS INTERATIVAS (FUNDO VIVO)
+    // ==========================================
+    const canvas = document.createElement('canvas');
+    canvas.id = 'bg-canvas';
+    document.body.prepend(canvas);
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    const particleCount = Math.floor(width / 30);
+
+    for (let i = 0; i < particleCount; i++) {
+        particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+            radius: Math.random() * 1.8 + 0.5
+        });
+    }
+
+    function animateParticles() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = 'rgba(99, 102, 241, 0.5)';
+        ctx.strokeStyle = 'rgba(99, 102, 241, 0.1)';
+
+        particles.forEach((p, index) => {
+            p.x += p.vx;
+            p.y += p.vy;
+
+            if (p.x < 0 || p.x > width) p.vx *= -1;
+            if (p.y < 0 || p.y > height) p.vy *= -1;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Conectar partículas vizinhas
+            for (let j = index + 1; j < particles.length; j++) {
+                const p2 = particles[j];
+                const dx = p.x - p2.x;
+                const dy = p.y - p2.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 130) {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            }
+        });
+
+        requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // ==========================================
+    // EFEITO SPOTLIGHT NOS CARDS (SEGUE O RATO)
+    // ==========================================
+    document.addEventListener('mousemove', (e) => {
+        const cards = document.querySelectorAll('.projeto-card');
+        cards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            card.style.setProperty('--mouse-x', `${x}px`);
+            card.style.setProperty('--mouse-y', `${y}px`);
+        });
+    });
 });
 
 // 1. Conexão com o Supabase
@@ -28,33 +108,29 @@ async function testarConexao() {
             console.error('❌ Erro ao conectar com o Supabase:', error.message);
         } else {
             console.log('✅ Conectado com sucesso ao Supabase!');
-            console.log('Dados da tabela usuario:', data);
         }
     } catch (err) {
         console.error('❌ Erro de conexão:', err);
     }
 }
 
-// Executa o teste assim que a página abrir
 testarConexao();
 
 // ==========================================
 // FUNÇÕES DA ÁREA ADMIN (LOGIN E DASHBOARD)
 // ==========================================
 
-// Função de Login consultando diretamente a tabela 'usuario'
 async function fazerLogin() {
     const emailInput = document.getElementById('email-login').value;
     const senhaInput = document.getElementById('senha-login').value;
     const mensagem = document.getElementById('mensagem-erro');
 
     try {
-        // Busca na tabela 'usuario' se existe alguém com esse e-mail e senha
         const { data, error } = await _supabase
             .from('usuario')
             .select('*')
-            .eq('e-mail', emailInput) // Nome da coluna exato que está na sua tabela
-            .eq('senha', senhaInput)   // Nome da coluna exato que está na sua tabela
+            .eq('e-mail', emailInput)
+            .eq('senha', senhaInput)
             .single();
 
         if (error || !data) {
@@ -62,7 +138,6 @@ async function fazerLogin() {
             return;
         }
 
-        // Se encontrou o usuário na tabela, o login deu certo!
         console.log('✅ Login efetuado com sucesso:', data.nome);
         window.location.href = 'dashboard.html';
 
@@ -70,15 +145,13 @@ async function fazerLogin() {
         mensagem.innerText = 'Erro ao tentar fazer login.';
         console.error(err);
     }
-} // <--- AQUI ESTÁ A CHAVETA QUE FALTAVA FECHAR A FUNÇÃO FAZERLOGIN!
+}
 
-// 2. Função para sair (Logout)
 async function fazerLogout() {
     await _supabase.auth.signOut();
     window.location.href = 'login.html';
 }
 
-// 3. Função para adicionar Projeto no banco de dados
 async function adicionarProjeto() {
     const nome = document.getElementById('titulo-projeto').value;
     const descricao = document.getElementById('descricao-projeto').value;
@@ -93,7 +166,6 @@ async function adicionarProjeto() {
     }
 
     try {
-        // Insere os dados na tabela 'projetos' usando os nomes corretos das colunas
         const { data, error } = await _supabase
             .from('projetos')
             .insert([
@@ -107,10 +179,9 @@ async function adicionarProjeto() {
 
         if (error) throw error;
 
-        status.style.color = "#28a745"; // Verde
+        status.style.color = "#28a745";
         status.innerText = "✅ Projeto adicionado com sucesso!";
         
-        // Limpa os campos depois de salvar
         document.getElementById('titulo-projeto').value = '';
         document.getElementById('descricao-projeto').value = '';
         document.getElementById('imagem-projeto').value = '';
@@ -122,15 +193,13 @@ async function adicionarProjeto() {
         console.error(error.message);
     }
 }
-// Função para buscar e exibir os projetos do Supabase no portefólio
+
 async function carregarProjetosPortefolio() {
     const container = document.getElementById('lista-projetos');
     
-    // Se não encontrar o contentor na página atual, interrompe a execução para não dar erro
     if (!container) return; 
 
     try {
-        // Busca os dados na tabela 'projetos' do Supabase ordenados por ID decrescente (mais recentes primeiro)
         const { data, error } = await _supabase
             .from('projetos')
             .select('*')
@@ -138,7 +207,6 @@ async function carregarProjetosPortefolio() {
 
         if (error) throw error;
 
-        // Limpa o texto de "A carregar..."
         container.innerHTML = '';
 
         if (!data || data.length === 0) {
@@ -146,10 +214,9 @@ async function carregarProjetosPortefolio() {
             return;
         }
 
-        // Cria o HTML para cada projeto encontrado na base de dados
         data.forEach(projeto => {
             const card = document.createElement('div');
-            card.classList.add('projeto-card'); // Pode estilizar esta classe no style.css
+            card.classList.add('projeto-card');
 
             card.innerHTML = `
                 <img src="${projeto.foto}" alt="${projeto.nome}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
@@ -167,7 +234,6 @@ async function carregarProjetosPortefolio() {
     }
 }
 
-// Executa a função assim que a página estiver totalmente carregada
 document.addEventListener('DOMContentLoaded', () => {
     carregarProjetosPortefolio();
 });
