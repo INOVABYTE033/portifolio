@@ -609,3 +609,147 @@ footer a:hover {
         transform: translateX(100%);
     }
 }
+/* ==========================================
+   SPLASH SCREEN (ANIMAÇÃO DE ENTRADA)
+   ========================================== */
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #09090b;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#splash-screen.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.splash-content {
+    background: rgba(18, 18, 26, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+    font-family: monospace;
+}
+
+.terminal-loader-header {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.terminal-loader-body {
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #a1a1aa;
+}
+
+.linha-code {
+    opacity: 0;
+    transform: translateY(5px);
+    animation: aparecerLinha 0.4s forwards;
+}
+
+.linha-code.delay-1 {
+    animation-delay: 0.5s;
+}
+
+.linha-code.delay-2 {
+    animation-delay: 1s;
+    color: #34d399; /* Cor verde de sucesso na última linha */
+}
+
+@keyframes aparecerLinha {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.status-tempo {
+    background: rgba(0, 0, 0, 0.25);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.banner-topo {
+    box-shadow: 0 0 25px rgba(147, 51, 234, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.lead-form {
+    max-width: 500px;
+    margin: 40px auto 0;
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.lead-form h3 {
+    margin-bottom: 20px;
+    color: #fff;
+    font-size: 1.3rem;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group input,
+.input-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus,
+.input-group textarea:focus {
+    border-color: #4da6ff;
+}
+
+#btnEnviar {
+    width: 100%;
+    padding: 12px;
+    background: #ffffff;
+    color: #000000;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+}
+
+#btnEnviar:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+.status-msg {
+    margin-top: 15px;
+    font-size: 0.9rem;
+}

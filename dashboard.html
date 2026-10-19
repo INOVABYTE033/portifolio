@@ -21,6 +21,7 @@
     </header>
 
     <main>
+        <!-- SECÇÃO DE ADICIONAR PROJETOS -->
         <section id="dashboard-projetos">
             <h2>Adicionar Novo Projeto</h2>
             
@@ -39,8 +40,31 @@
                 <p id="mensagem-status" style="margin-top: 10px; font-weight: bold;"></p>
             </div>
         </section>
+
+        <!-- SECÇÃO: LEADS E MENSAGENS RECEBIDAS -->
+        <section class="dashboard-section">
+            <h2>Leads e Mensagens Recebidas</h2>
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Nome</th>
+                            <th>E-mail</th>
+                            <th>Telefone</th>
+                            <th>Mensagem</th>
+                            <th>Ações</th> <!-- Coluna para o botão de responder -->
+                        </tr>
+                    </thead>
+                    <tbody id="lista-leads">
+                        <!-- As mensagens do Supabase vão aparecer aqui dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
     <script src="script.js"></script>
+    
 </body>
 </html>

@@ -95,6 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Carregar projetos ao iniciar a página do portfólio
     carregarProjetosPortefolio();
+
+    // Inicializar o evento do formulário de contato/leads
+    inicializarFormularioLeads();
+
+    // Carregar os leads caso esteja na página do Dashboard
+    carregarLeadsDashboard();
 });
 
 // ==========================================
@@ -124,12 +130,120 @@ async function testarConexao() {
 testarConexao();
 
 // ==========================================
+// CAPTURA E ENVIO DE LEADS (CONTATO)
+// ==========================================
+function inicializarFormularioLeads() {
+    const leadForm = document.getElementById('leadForm');
+
+    if (leadForm) {
+        leadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nome = document.getElementById('nome').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefone = document.getElementById('telefone')?.value.trim() || '';
+            const mensagem = document.getElementById('mensagem')?.value.trim() || '';
+
+            mostrarToast('A enviar mensagem...', 'info');
+
+            try {
+                // Inserção na tabela 'leads' no Supabase
+                const { data, error } = await _supabase
+                    .from('leads')
+                    .insert([
+                        { 
+                            nome: nome, 
+                            email: email, 
+                            telefone: telefone, 
+                            mensagem: mensagem 
+                        }
+                    ]);
+
+                if (error) {
+                    console.error('❌ Erro detalhado do Supabase:', error);
+                    mostrarToast(`Erro: ${error.message}`, 'error');
+                    return;
+                }
+
+                mostrarToast('Mensagem enviada com sucesso!', 'success');
+                leadForm.reset();
+
+            } catch (err) {
+                console.error('❌ Erro ao enviar lead:', err);
+                mostrarToast('Erro ao enviar mensagem. Tente novamente!', 'error');
+            }
+        });
+    }
+}
+
+// ==========================================
+// CARREGAR LEADS NO DASHBOARD (COM BOTÃO DO GMAIL)
+// ==========================================
+async function carregarLeadsDashboard() {
+    const containerLeads = document.getElementById('lista-leads');
+    
+    // Se a tabela não existir nesta página, cancela
+    if (!containerLeads) return;
+
+    try {
+        const { data, error } = await _supabase
+            .from('leads')
+            .select('*')
+            .order('id', { ascending: false });
+
+        if (error) {
+            console.error('❌ Erro ao buscar leads:', error.message);
+            containerLeads.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ff6b6b;">Erro ao carregar mensagens: ${error.message}</td></tr>`;
+            return;
+        }
+
+        containerLeads.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            containerLeads.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #aaa;">Nenhuma mensagem recebida ainda.</td></tr>';
+            return;
+        }
+
+        data.forEach(lead => {
+            const dataFormatada = lead.created_at 
+                ? new Date(lead.created_at).toLocaleString('pt-BR') 
+                : '-';
+
+            // Link para abrir o Gmail diretamente na aba de composição
+            const emailDestinatario = encodeURIComponent(lead.email || '');
+            const assunto = encodeURIComponent(`Resposta ao seu contato - Portfólio Enzo Alves`);
+            const corpo = encodeURIComponent(`Olá ${lead.nome || ''},\n\nRecebi a sua mensagem enviada através do portfólio:\n"${lead.mensagem || ''}"\n\n---`);
+            
+            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${emailDestinatario}&su=${assunto}&body=${corpo}`;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${dataFormatada}</td>
+                <td><strong>${lead.nome || '-'}</strong></td>
+                <td><a href="mailto:${lead.email}" style="color: #4da6ff;">${lead.email || '-'}</a></td>
+                <td>${lead.telefone || '-'}</td>
+                <td>${lead.mensagem || '-'}</td>
+                <td>
+                    <a href="${gmailUrl}" target="_blank" rel="noopener noreferrer" style="padding: 6px 12px; background: #ea4335; color: #ffffff; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 0.85rem; display: inline-block; white-space: nowrap;">
+                        📧 Responder no Gmail
+                    </a>
+                </td>
+            `;
+            containerLeads.appendChild(tr);
+        });
+
+    } catch (err) {
+        console.error('❌ Erro geral ao carregar leads:', err);
+        containerLeads.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #ff6b6b;">Erro ao carregar mensagens.</td></tr>';
+    }
+}
+
+// ==========================================
 // FUNÇÃO DE NOTIFICAÇÃO TOAST
 // ==========================================
 function mostrarToast(mensagem, tipo = 'success') {
     let container = document.getElementById('toast-container');
     
-    // Se o container ainda não existir na página, cria-o automaticamente
     if (!container) {
         container = document.createElement('div');
         container.id = 'toast-container';
@@ -139,12 +253,11 @@ function mostrarToast(mensagem, tipo = 'success') {
     const toast = document.createElement('div');
     toast.classList.add('toast', tipo);
     
-    const icone = tipo === 'success' ? '✅' : '❌';
+    const icone = tipo === 'success' ? '✅' : (tipo === 'info' ? 'ℹ️' : '❌');
     toast.innerHTML = `<span>${icone}</span> <span>${mensagem}</span>`;
 
     container.appendChild(toast);
 
-    // Remove o toast automaticamente após 3.5 segundos com animação de saída
     setTimeout(() => {
         toast.style.animation = 'toastOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
         setTimeout(() => toast.remove(), 300);
@@ -285,3 +398,31 @@ async function carregarProjetosPortefolio() {
         container.innerHTML = '<p>Erro ao carregar os projetos no momento.</p>';
     }
 }
+
+window.addEventListener('load', () => {
+    const splash = document.getElementById('splash-screen');
+    
+    if (splash) {
+        const esconderSplash = () => {
+            splash.classList.add('fade-out');
+            setTimeout(() => splash.remove(), 500);
+        };
+
+        const timer = setTimeout(esconderSplash, 1800);
+
+        splash.addEventListener('click', () => {
+            clearTimeout(timer);
+            esconderSplash();
+        });
+    }
+});
+
+function atualizarRelogioBanner() {
+    const relogio = document.getElementById('relogio-banner');
+    if (relogio) {
+        const agora = new Date();
+        relogio.textContent = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+}
+setInterval(atualizarRelogioBanner, 1000);
+atualizarRelogioBanner();

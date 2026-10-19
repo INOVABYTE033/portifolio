@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- Biblioteca do Supabase -->
+    <!-- Biblioteca do Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
@@ -37,7 +37,7 @@
             <h2>Contatos</h2>
             
             <p class="contato-intro">
-                Tem uma ideia inovadora, precisa de um site ou quer conversar sobre um projeto? Entre em contato comigo através dos canais abaixo:
+                Tem uma ideia inovadora, precisa de um site ou quer conversar sobre um projeto? Entre em contato comigo através dos canais abaixo ou envie uma mensagem direta:
             </p>
 
             <div class="contato-botoes">
@@ -58,6 +58,31 @@
                     ☎️ Ligar
                 </a>
             </div>
+
+            <!-- FORMULÁRIO DE LEADS/MENSAGEM -->
+            <form id="leadForm" class="lead-form">
+                <h3>Envie uma mensagem direta</h3>
+
+                <div class="input-group">
+                    <input type="text" id="nome" placeholder="Seu nome" required>
+                </div>
+
+                <div class="input-group">
+                    <input type="email" id="email" placeholder="Seu e-mail" required>
+                </div>
+
+                <div class="input-group">
+                    <input type="tel" id="telefone" placeholder="Seu telefone (opcional)">
+                </div>
+
+                <div class="input-group">
+                    <textarea id="mensagem" rows="4" placeholder="Sua mensagem..." required></textarea>
+                </div>
+
+                <button type="submit" id="btnEnviar">Enviar Mensagem</button>
+                <p id="mensagemStatus" class="status-msg"></p>
+            </form>
+
         </section>
 
     </main>
